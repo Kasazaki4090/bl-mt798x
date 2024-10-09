@@ -820,6 +820,7 @@ static const struct nand_ops spinand_ops = {
 
 static const struct spinand_manufacturer *spinand_manufacturers[] = {
 	&gigadevice_spinand_manufacturer,
+	&gsto_spinand_manufacturer,
 	&macronix_spinand_manufacturer,
 	&micron_spinand_manufacturer,
 	&toshiba_spinand_manufacturer,
@@ -827,6 +828,8 @@ static const struct spinand_manufacturer *spinand_manufacturers[] = {
 	&foresee_spinand_manufacturer,
 	&etron_spinand_manufacturer,
 	&esmt_c8_spinand_manufacturer,
+	&fmsh_spinand_manufacturer,
+	&dosilicon_spinand_manufacturer,
 };
 
 static int spinand_manufacturer_match(struct spinand_device *spinand,
@@ -1007,8 +1010,9 @@ static int spinand_detect(struct spinand_device *spinand)
 
 	ret = spinand_id_detect(spinand);
 	if (ret) {
-		dev_err(spinand->slave->dev, "unknown raw ID %*phN\n",
-			SPINAND_MAX_ID_LEN, spinand->id.data);
+		dev_err(spinand->slave->dev, "unknown raw ID %02x %02x %02x %02x\n",
+			spinand->id.data[0], spinand->id.data[1],
+			spinand->id.data[2], spinand->id.data[3]);
 		return ret;
 	}
 
