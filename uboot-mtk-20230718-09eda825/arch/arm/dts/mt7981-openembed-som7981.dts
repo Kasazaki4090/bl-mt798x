@@ -1,8 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0
-/*
- * Copyright (c) 2021 MediaTek Inc.
- * Author: Sam Shih <sam.shih@mediatek.com>
- */
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 
 /dts-v1/;
 #include "mt7981.dtsi"
@@ -11,8 +7,9 @@
 / {
 	#address-cells = <1>;
 	#size-cells = <1>;
-	model = "mt7981-rfb";
+	model = "mt7981-openembed-som7981";
 	compatible = "mediatek,mt7981", "mediatek,mt7981-rfb";
+
 	chosen {
 		stdout-path = &uart0;
 		tick-timer = &timer0;
@@ -20,43 +17,52 @@
 
 	config {
 		bootcmd = "mtkboardboot";
-
-		blink_led = "blue:run";
-		system_led = "white:system";
-		gpio_power_clr = <12>;
-
-		environment {
-			lu = "mtkupgrade fip uboot-gl-mt3000.bin";
-			lf = "mtkupgrade fw openwrt-gl-mt3000.bin";
-		};
+		blink_led = "red:wlan5g";
+		system_led = "red:wlan5g";
 	};
 
-	gpio-keys-polled {
+	gpio-keys {
 		compatible = "gpio-keys";
 
-		power-button {
+		button-reset {
 			label = "reset";
+			linux,code = <KEY_RESTART>;
 			gpios = <&gpio 1 GPIO_ACTIVE_LOW>;
 		};
 	};
 
-	leds {
+	gpio-leds {
 		compatible = "gpio-leds";
 
-		led@0 {
-			label = "white:system";
-			gpios = <&gpio 30 GPIO_ACTIVE_LOW>;
+		led-0 {
+			label = "green:gbe";
+			gpios = <&gpio 8 GPIO_ACTIVE_LOW>;
 		};
 
-		led@1 {
-			label = "blue:run";
-			gpios = <&gpio 31 GPIO_ACTIVE_LOW>;
+		led-1 {
+			label = "amber:gbe";
+			gpios = <&gpio 13 GPIO_ACTIVE_LOW>;
+		};
+
+		led-2 {
+			label = "green:wlan2g";
+			gpios = <&gpio 34 GPIO_ACTIVE_LOW>;
+		};
+
+		wlan5g_led: led-3 {
+			label = "red:wlan5g";
+			gpios = <&gpio 35 GPIO_ACTIVE_LOW>;
 		};
 	};
-};
 
-&uart0 {
-	status = "okay";
+	memory@40000000 {
+		device_type = "memory";
+		reg = <0x40000000 0x40000000>;
+	};
+
+	bl2_verify {
+		bl2_compatible = "spim-nand";
+	};
 };
 
 &eth {
@@ -68,7 +74,7 @@
 	mdio {
 		phy0: ethernet-phy@0 {
 			compatible = "ethernet-phy-id03a2.9461";
-			reg = <0x0>;
+			reg = <0>;
 			phy-mode = "gmii";
 		};
 	};
@@ -84,20 +90,13 @@
 		conf-pu {
 			pins = "SPI0_CS", "SPI0_HOLD", "SPI0_WP";
 			drive-strength = <MTK_DRIVE_8mA>;
-			bias-pull-up = <MTK_PUPD_SET_R1R0_11>;
+			bias-pull-up = <MTK_PUPD_SET_R1R0_00>;
 		};
 
 		conf-pd {
 			pins = "SPI0_CLK", "SPI0_MOSI", "SPI0_MISO";
 			drive-strength = <MTK_DRIVE_8mA>;
-			bias-pull-down = <MTK_PUPD_SET_R1R0_11>;
-		};
-	};
-
-	spic_pins: spi1-pins-func-1 {
-		mux {
-			function = "spi";
-			groups = "spi1_1";
+			bias-pull-down = <MTK_PUPD_SET_R1R0_00>;
 		};
 	};
 };
@@ -121,4 +120,12 @@
 		reg = <0>;
 		spi-max-frequency = <52000000>;
 	};
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&watchdog {
+	status = "disabled";
 };
